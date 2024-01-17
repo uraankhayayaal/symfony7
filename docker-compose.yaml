@@ -1,0 +1,45 @@
+version: '3.7'
+
+services:
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx-container
+    ports:
+      - "3020:80"
+    volumes:
+      - ./:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+      - db
+    networks:
+      - symfonynet
+
+  php:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: php-container
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - symfonynet
+
+  db:
+    image: mysql:8
+    container_name: db-container
+    volumes:
+      - ./mysql:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: always # always restart unless stopped manually
+    environment:
+      GITHUB_API_TOKEN: ${GITHUB_API_TOKEN}
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_PASSWORD: secret
+    networks:
+      - symfonynet
+
+networks:
+  symfonynet:
+    driver: bridge
