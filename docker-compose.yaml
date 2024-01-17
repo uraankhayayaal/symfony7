@@ -23,6 +23,11 @@ services:
     container_name: php-container
     volumes:
       - ./:/var/www/html
+    environment:
+      GITHUB_API_TOKEN: ${GITHUB_API_TOKEN}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USERNAME: ${MYSQL_USERNAME}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     networks:
       - symfonynet
 
@@ -34,9 +39,27 @@ services:
     command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: always # always restart unless stopped manually
     environment:
-      GITHUB_API_TOKEN: ${GITHUB_API_TOKEN}
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: ${MYSQL_TEST_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_TEST_DATABASE}
+      MYSQL_USER: ${MYSQL_TEST_USERNAME}
+      MYSQL_PASSWORD: ${MYSQL_TEST_PASSWORD}
+    networks:
+      - symfonynet
+
+  pma:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma-container
+    restart: always
+    ports:
+      - 3021:80
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: ${MYSQL_HOST}
+      PMA_USER: ${MYSQL_USERNAME}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+      UPLOAD_LIMIT: 300M
+      MEMORY_LIMIT: 1024M
+      MAX_EXECUTION_TIME: 300
     networks:
       - symfonynet
 
